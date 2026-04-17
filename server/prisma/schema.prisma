@@ -1,0 +1,196 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["flowdesk"]
+}
+
+enum GlobalRole {
+  admin
+  manager
+  member
+
+  @@schema("flowdesk")
+}
+
+enum WorkspaceRole {
+  owner
+  admin
+  manager
+  member
+
+  @@schema("flowdesk")
+}
+
+enum ProjectStatus {
+  active
+  paused
+  archived
+
+  @@schema("flowdesk")
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  urgent
+
+  @@schema("flowdesk")
+}
+
+enum NotificationType {
+  task_assigned
+  comment
+  workspace_invite
+  task_moved
+
+  @@schema("flowdesk")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  password     String
+  avatar       String?
+  role         GlobalRole @default(member)
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownedWorkspaces  Workspace[]         @relation("WorkspaceOwner")
+  memberships      WorkspaceMember[]
+  createdTasks     Task[]              @relation("TaskCreator")
+  assignedTasks    Task[]              @relation("TaskAssignee")
+  comments         Comment[]
+  notifications    Notification[]
+
+  @@map("users")
+  @@schema("flowdesk")
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner    User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members  WorkspaceMember[]
+  projects Project[]
+
+  @@index([ownerId])
+  @@map("workspaces")
+  @@schema("flowdesk")
+}
+
+model WorkspaceMember {
+  id          String        @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        WorkspaceRole @default(member)
+  createdAt   DateTime      @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("workspace_members")
+  @@schema("flowdesk")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  status      ProjectStatus @default(active)
+  dueDate     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  columns   Column[]
+
+  @@index([workspaceId])
+  @@map("projects")
+  @@schema("flowdesk")
+}
+
+model Column {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  order     Int
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@index([projectId])
+  @@map("columns")
+  @@schema("flowdesk")
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  columnId    String
+  title       String
+  description String?
+  priority    TaskPriority @default(medium)
+  dueDate     DateTime?
+  assignedTo  String?
+  createdBy   String
+  position    Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  column   Column    @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  assignee User?     @relation("TaskAssignee", fields: [assignedTo], references: [id])
+  creator  User      @relation("TaskCreator", fields: [createdBy], references: [id])
+  comments Comment[]
+
+  @@index([columnId])
+  @@index([assignedTo])
+  @@map("tasks")
+  @@schema("flowdesk")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
+  @@map("comments")
+  @@schema("flowdesk")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  content   String
+  link      String?
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
+  @@schema("flowdesk")
+}
