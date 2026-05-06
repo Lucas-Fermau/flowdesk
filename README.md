@@ -1,6 +1,31 @@
 # FlowDesk
 
+[![Live Demo](https://img.shields.io/badge/demo-live-22c55e?style=for-the-badge&logo=vercel)](https://flowdesk-virid-delta.vercel.app)
+[![Repo](https://img.shields.io/badge/repo-github-181717?style=for-the-badge&logo=github)](https://github.com/Lucas-Fermau/flowdesk)
+[![Stack](https://img.shields.io/badge/stack-Next.js%2015%20%C2%B7%20Express%20%C2%B7%20Prisma%20%C2%B7%20Socket.io-6366f1?style=for-the-badge)](https://flowdesk-virid-delta.vercel.app)
+
 Plataforma SaaS full-stack de gestão de equipes e projetos — workspaces, Kanban com drag-and-drop, dashboard com métricas e colaboração em tempo real. Inspirado em Linear, Notion, Trello e Jira.
+
+> 🌐 **Demo ao vivo:** **<https://flowdesk-virid-delta.vercel.app>** — entre com `admin@flowdesk.com` / `123456` e explore o Kanban completo.
+
+---
+
+## Acesso rápido
+
+| | |
+|---|---|
+| 🌐 **App** | <https://flowdesk-virid-delta.vercel.app> |
+| 🔌 **API** | <https://flowdesk-api-chi.vercel.app/api/health> |
+| 💻 **Repo** | <https://github.com/Lucas-Fermau/flowdesk> |
+
+### Contas de teste (já populadas no banco)
+
+| Tipo    | Email                   | Senha    |
+|---------|-------------------------|----------|
+| Admin   | `admin@flowdesk.com`    | `123456` |
+| Manager | `manager@flowdesk.com`  | `123456` |
+| Member  | `member@flowdesk.com`   | `123456` |
+
 
 > Projeto de portfólio criado para demonstrar engenharia full-stack de nível profissional: arquitetura em camadas, JWT com rotação de refresh tokens, RBAC granular, WebSockets, drag-and-drop persistido e UI moderna.
 
